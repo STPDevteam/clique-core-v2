@@ -4,6 +4,8 @@ pragma solidity =0.8.9;
 import "./interfaces/IDAOBase.sol";
 import "./interfaces/IERC20Base.sol";
 import "./interfaces/IDAOFactory.sol";
+import '@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol';
+import '@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol';
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import '@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol';
@@ -12,6 +14,8 @@ import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     using ClonesUpgradeable for address;
     using SafeERC20Upgradeable for IERC20Upgradeable;
+
+    address immutable public PROXY_ADMIN_ADDRESS;
 
     address public daoImpl;
     mapping(string => bool) public handles;
@@ -29,10 +33,14 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     event CreateERC20(address indexed creator, address token);
     event ClaimReserve(address indexed account, address indexed token, uint256 amount);
 
-    constructor() { }
+    constructor() {
+        ProxyAdmin _proxyAdmin = new ProxyAdmin();
+        PROXY_ADMIN_ADDRESS = address(_proxyAdmin);
+    }
 
-    function initialize(address daoImpl_) external initializer {
+    function initialize(address daoImpl_, address tokenImpl_) external initializer {
         daoImpl = daoImpl_;
+        tokenImpl = tokenImpl_;
         OwnableUpgradeable.__Ownable_init();
     }
 
@@ -68,14 +76,28 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
         IDAOBase.Governance calldata governance_
     ) external {
         require(!handles[general_.handle], 'DAOFactory: handle is already taken.');
-        address _daoAddress = daoImpl.clone();
-        IDAOBase(_daoAddress).initialize(general_, token_, governance_);
-        OwnableUpgradeable(_daoAddress).transferOwnership(msg.sender);
+
+        // address _daoAddress = daoImpl.clone();
+        // IDAOBase(_daoAddress).initialize(general_, token_, governance_);
+        // OwnableUpgradeable(_daoAddress).transferOwnership(msg.sender);
+
+        // using proxy
+        TransparentUpgradeableProxy _proxy = new TransparentUpgradeableProxy(daoImpl, PROXY_ADMIN_ADDRESS, '');
+        IDAOBase(_proxy).initialize(general_, token_, governance_);
+        OwnableUpgradeable(_proxy).transferOwnership(msg.sender);
 
         handles[general_.handle] = true;
         _daoAddresses[_daoAddress] = true;
 
         emit CreateDAO(msg.sender, _daoAddress, token_.chainId, token_.tokenAddress);
+    }
+
+    function upgradeProxy(address daoAddress_) external {
+        require(OwnableUpgradeable(daoAddress_).owner() == msg.sender, 'DAOFactory: cannot only upgrade by owner.');
+        require(ProxyAdmin(PROXY_ADMIN_ADDRESS).getProxyAdmin(daoAddress_) == PROXY_ADMIN_ADDRESS, 'DAOFactory: not a valid dao address.');
+        require(ProxyAdmin(PROXY_ADMIN_ADDRESS).getProxyImplementation(daoAddress_) != daoImpl, 'DAOFactory: already up-to-date.');
+
+        ProxyAdmin(PROXY_ADMIN_ADDRESS).upgrade(TransparentUpgradeableProxy(daoAddress_), daoImpl);
     }
 
     function createERC20(
