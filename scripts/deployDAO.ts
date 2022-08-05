@@ -7,6 +7,10 @@ async function main() {
     const daoBase = await DAOBase.deploy();
     await daoBase.deployed();
 
+    const ERC20Base = await ethers.getContractFactory('ERC20Base');
+    const erc20Base = await ERC20Base.deploy();
+    await erc20Base.deployed();
+
     const DAOFactory = await ethers.getContractFactory('DAOFactory');
     const daoFactory = await DAOFactory.deploy();
     await daoFactory.deployed();
@@ -17,7 +21,7 @@ async function main() {
 
     // init
     const proxyDaoFactory = DAOFactory.attach(stpProxy.address);
-    const txInit = await proxyDaoFactory.connect(signers[1]).initialize(daoBase.address);
+    const txInit = await proxyDaoFactory.connect(signers[1]).initialize(daoBase.address, erc20Base.address);
     await txInit.wait();
 
     console.log("DAOBase deployed to:", daoBase.address);
