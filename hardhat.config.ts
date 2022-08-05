@@ -39,7 +39,11 @@ const config: HardhatUserConfig = {
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.com/
-    apiKey: `${process.env.apiKey}`
+    apiKey: {
+      rinkeby: `${process.env.apiKey}`,
+      polygonMumbai: `${process.env.apiKeyPolygon}`,
+      mainnet: `${process.env.apiKey}`
+    }
   },
   solidity: {
     version: "0.8.9",
