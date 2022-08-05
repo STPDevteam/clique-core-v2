@@ -5,6 +5,7 @@ require('dotenv').config({path: '.env'})
 
 const config: HardhatUserConfig = {
   networks: {
+    // Test net
     rinkeby: {
       url: `${process.env.provider_rinkeby}`,
       accounts: {
@@ -14,6 +15,17 @@ const config: HardhatUserConfig = {
         count: 10
       }
     },
+    mumbai: {
+      url: `${process.env.provider_mumbai}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_rinkeby}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 1,
+        count: 10
+      }
+    },
+
+    // Main net
     mainnet: {
       url: `${process.env.provider_mainnet}`,
       accounts: {
