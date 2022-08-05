@@ -15,8 +15,8 @@ async function main() {
     const daoFactory = await DAOFactory.deploy();
     await daoFactory.deployed();
 
-    const STPProxy = await ethers.getContractFactory('STPProxy');
-    const stpProxy = await STPProxy.deploy(daoFactory.address, signers[0].address);
+    const STPProxy = await ethers.getContractFactory('TransparentUpgradeableProxy');
+    const stpProxy = await STPProxy.deploy(daoFactory.address, signers[0].address, '0x');
     await stpProxy.deployed();
 
     // init
