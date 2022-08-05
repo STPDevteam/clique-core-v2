@@ -1,0 +1,7 @@
+# 📜 Mumbai Addresses
+| Contract | Address |
+| --- | --- |
+DAOBase |  `0x06CD08b195724D7A73e31da38C6533C191E14C82`
+ERC20Base |  `0x2389324477762d2307b454579b10e9118f0c568f`
+DAOFactory |  `0x1a4d93000485cbc6b478fff33f7623aa5afc313a`
+DAOFactory Proxy |  `0x4E8156249733937c228B50A2A315F569BDfDc912`

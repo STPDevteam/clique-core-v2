@@ -1,13 +1,25 @@
-# Sample Hardhat Project
+# Clique V2 Smart Contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
-
+### Local Setup Steps
 ```shell
-npx hardhat help
-npx hardhat test
-GAS_REPORT=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
+# Clone the repository
+git clone https://github.com/STPDevteam/clique-core-v2.git
+
+# Install dependencies
+npm install
+
+# Set up environment variables (keys)
+# TODO: .env.example file still missing
+cp .env.example .env # (linux)
+copy .env.example .env # (windows)
+
+# compile solidity, the below will automatically also run yarn typechain
+npx harhat compile
+
+# test deployment or deploy 
+# TODO: we are working on unit test!!!
 ```
+
+## 📜 Contract Addresses
+- For [Rinkeby Testnet](./docs/deployments/rinkeby.md).
+- For [Mumbai Testnet](./docs/deployments/mumbai.md).
