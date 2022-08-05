@@ -15,7 +15,7 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     using ClonesUpgradeable for address;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    address immutable public PROXY_ADMIN_ADDRESS;
+    address public proxyAdminAddress;
 
     address public daoImpl;
     mapping(string => bool) public handles;
@@ -33,15 +33,15 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     event CreateERC20(address indexed creator, address token);
     event ClaimReserve(address indexed account, address indexed token, uint256 amount);
 
-    constructor() {
-        ProxyAdmin _proxyAdmin = new ProxyAdmin();
-        PROXY_ADMIN_ADDRESS = address(_proxyAdmin);
-    }
+    constructor() { }
 
     function initialize(address daoImpl_, address tokenImpl_) external initializer {
         daoImpl = daoImpl_;
         tokenImpl = tokenImpl_;
         OwnableUpgradeable.__Ownable_init();
+
+        ProxyAdmin _proxyAdmin = new ProxyAdmin();
+        proxyAdminAddress = address(_proxyAdmin);
     }
 
     modifier onlyDao() {
@@ -82,7 +82,7 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
         // OwnableUpgradeable(_daoAddress).transferOwnership(msg.sender);
 
         // using proxy
-        TransparentUpgradeableProxy _proxy = new TransparentUpgradeableProxy(daoImpl, PROXY_ADMIN_ADDRESS, '');
+        TransparentUpgradeableProxy _proxy = new TransparentUpgradeableProxy(daoImpl, proxyAdminAddress, '');
         IDAOBase(_proxy).initialize(general_, token_, governance_);
         OwnableUpgradeable(_proxy).transferOwnership(msg.sender);
 
@@ -93,11 +93,13 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     }
 
     function upgradeProxy(address daoAddress_) external {
+        // saving gas
+        address _proxyAdminAddress = proxyAdminAddress;
         require(OwnableUpgradeable(daoAddress_).owner() == msg.sender, 'DAOFactory: cannot only upgrade by owner.');
-        require(ProxyAdmin(PROXY_ADMIN_ADDRESS).getProxyAdmin(daoAddress_) == PROXY_ADMIN_ADDRESS, 'DAOFactory: not a valid dao address.');
-        require(ProxyAdmin(PROXY_ADMIN_ADDRESS).getProxyImplementation(daoAddress_) != daoImpl, 'DAOFactory: already up-to-date.');
+        require(ProxyAdmin(_proxyAdminAddress).getProxyAdmin(daoAddress_) == _proxyAdminAddress, 'DAOFactory: not a valid dao address.');
+        require(ProxyAdmin(_proxyAdminAddress).getProxyImplementation(daoAddress_) != daoImpl, 'DAOFactory: already up-to-date.');
 
-        ProxyAdmin(PROXY_ADMIN_ADDRESS).upgrade(TransparentUpgradeableProxy(daoAddress_), daoImpl);
+        ProxyAdmin(_proxyAdminAddress).upgrade(TransparentUpgradeableProxy(daoAddress_), daoImpl);
     }
 
     function createERC20(
