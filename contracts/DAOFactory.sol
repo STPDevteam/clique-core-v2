@@ -83,21 +83,21 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
 
         // using proxy
         TransparentUpgradeableProxy _proxy = new TransparentUpgradeableProxy(daoImpl, proxyAdminAddress, '');
-        IDAOBase(_proxy).initialize(general_, token_, governance_);
-        OwnableUpgradeable(_proxy).transferOwnership(msg.sender);
+        IDAOBase(address(_proxy)).initialize(general_, token_, governance_);
+        OwnableUpgradeable(address(_proxy)).transferOwnership(msg.sender);
 
         handles[general_.handle] = true;
-        _daoAddresses[_daoAddress] = true;
+        _daoAddresses[address(_proxy)] = true;
 
-        emit CreateDAO(msg.sender, _daoAddress, token_.chainId, token_.tokenAddress);
+        emit CreateDAO(msg.sender, address(_proxy), token_.chainId, token_.tokenAddress);
     }
 
-    function upgradeProxy(address daoAddress_) external {
+    function upgradeProxy(address payable daoAddress_) external {
         // saving gas
         address _proxyAdminAddress = proxyAdminAddress;
         require(OwnableUpgradeable(daoAddress_).owner() == msg.sender, 'DAOFactory: cannot only upgrade by owner.');
-        require(ProxyAdmin(_proxyAdminAddress).getProxyAdmin(daoAddress_) == _proxyAdminAddress, 'DAOFactory: not a valid dao address.');
-        require(ProxyAdmin(_proxyAdminAddress).getProxyImplementation(daoAddress_) != daoImpl, 'DAOFactory: already up-to-date.');
+        require(ProxyAdmin(_proxyAdminAddress).getProxyAdmin(TransparentUpgradeableProxy(daoAddress_)) == _proxyAdminAddress, 'DAOFactory: not a valid dao address.');
+        require(ProxyAdmin(_proxyAdminAddress).getProxyImplementation(TransparentUpgradeableProxy(daoAddress_)) != daoImpl, 'DAOFactory: already up-to-date.');
 
         ProxyAdmin(_proxyAdminAddress).upgrade(TransparentUpgradeableProxy(daoAddress_), daoImpl);
     }
