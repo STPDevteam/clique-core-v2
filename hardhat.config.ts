@@ -18,7 +18,7 @@ const config: HardhatUserConfig = {
     mumbai: {
       url: `${process.env.provider_mumbai}`,
       accounts: {
-        mnemonic: `${process.env.mnemonic_rinkeby}`,
+        mnemonic: `${process.env.mnemonic_mumbai}`,
         path: "m/44'/60'/0'/0",
         initialIndex: 1,
         count: 10
