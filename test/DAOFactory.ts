@@ -75,9 +75,8 @@ describe('DAOFactory', function () {
         it('Should claim if the unlockTime has arrived', async function () {
             await time.increase(600);
 
-            expect(daoFactoryProxy.connect(user1).claimReserve(0))
-                .to
-                .emit(deployedToken.address, 'Transfer')
+            await expect(daoFactoryProxy.connect(user1).claimReserve(0))
+                .to.emit(daoFactoryProxy, 'ClaimReserve')
                 .withArgs(await user1.getAddress(), deployedToken.address, ethers.utils.parseEther('1000'));
             expect(await deployedToken.balanceOf(await user1.getAddress())).to.be.equal(ethers.utils.parseEther('1000'));
         });
