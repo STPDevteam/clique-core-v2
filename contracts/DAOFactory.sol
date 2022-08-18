@@ -134,21 +134,18 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
         emit CreateERC20(msg.sender, _token);
     }
 
-    function claimReserve(address token_) external {
-        Reserve[] memory _reserves = reserves[msg.sender];
-        for (uint256 index = 0; index < _reserves.length; index++) {
-            Reserve memory _reserve = _reserves[index];
-            if (_reserve.token == token_) {
-                require(block.timestamp >= _reserve.lockDate, 'DAOFactory: lock');
-                if (index < _reserves.length - 1)
-                    reserves[msg.sender][index] = reserves[msg.sender][_reserves.length - 1];
-                reserves[msg.sender].pop();
+    function claimReserve(uint256 index_) external {
+        uint256 _length = reserves[msg.sender].length;
+        require(index_ < _length, 'DAOFactory: invalid index.');
 
-                IERC20Upgradeable(token_).safeTransfer(msg.sender, _reserve.amount);
-                emit ClaimReserve(msg.sender, token_, _reserve.amount);
-                break;
-            }
-        }
+        Reserve memory _reserve = reserves[msg.sender][index_];
+        require(block.timestamp >= _reserve.lockDate, 'DAOFactory: locked.');
+        if (index_ < _length - 1)
+            reserves[msg.sender][index_] = reserves[msg.sender][_length - 1];
+        reserves[msg.sender].pop();
+
+        IERC20Upgradeable(_reserve.token).safeTransfer(msg.sender, _reserve.amount);
+        emit ClaimReserve(msg.sender, _reserve.token, _reserve.amount);
     }
 
     /** ---------- public getting ---------- **/
