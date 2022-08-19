@@ -45,6 +45,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         bool cancel;
         address creator;
         string title;
+        string introduction;
         string content;
         uint256 startTime;
         uint256 endTime;
@@ -124,6 +125,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
      */
     function createProposal(
         string calldata title_,
+        string calldata introduction_,
         string calldata content_,
         uint256 startTime_,
         uint256 endTime_,
@@ -158,6 +160,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         }
         proposal.creator = msg.sender;
         proposal.title = title_;
+        proposal.introduction = introduction_;
         proposal.content = content_;
         proposal.startTime = startTime_;
         proposal.endTime = endTime_;
