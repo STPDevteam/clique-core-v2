@@ -110,10 +110,6 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         _setInfo(general_);
     }
 
-    function setToken(Token calldata token_) external onlyOwnerOrAdmin {
-        _setToken(token_);
-    }
-
     function setGovernance(Governance calldata governance_) external onlyOwnerOrAdmin {
         _setGovernance(governance_);
     }
