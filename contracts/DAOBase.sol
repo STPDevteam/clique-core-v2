@@ -66,6 +66,15 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         SignType signType;
     }
 
+    struct ProposalInput {
+        string title;
+        string introduction;
+        string content;
+        uint256 startTime;
+        uint256 endTime;
+        VotingType votingType;
+    }
+
 
     // @dev Modifier
     /**
@@ -120,33 +129,30 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
      * @dev create proposal
      */
     function createProposal(
-        string calldata title_,
-        string calldata introduction_,
-        string calldata content_,
-        uint256 startTime_,
-        uint256 endTime_,
-        VotingType votingType_,
+        ProposalInput calldata input_,  // avoid stack too deep
         string[] calldata options_,
         SignInfo calldata signInfo_,
         bytes calldata signature_
     ) external {
         Governance memory _governance = daoGovernance;
         require(
-            votingType_ != VotingType.Any &&
-            (_governance.votingType == VotingType.Any || _governance.votingType == votingType_),
+            input_.votingType != VotingType.Any &&
+            (_governance.votingType == VotingType.Any || _governance.votingType == input_.votingType),
             'DAOBase: invalid voting type.'
         );
         uint256 _nonce = IDAOFactory(factoryAddress).increaseNonce(msg.sender);
         require(_verifySignature(_nonce, signInfo_, signature_), 'DAOBase: invalid signer.');
         require(signInfo_.balance >= _governance.proposalThreshold, 'DAOBase: insufficient balance');
 
+        uint256 _endTime = input_.endTime;
         if (_governance.votingPeriod > 0) {
-            endTime_ = startTime_ + _governance.votingPeriod;
+            _endTime = input_.startTime + _governance.votingPeriod;
         }
-        require(startTime_ < endTime_, 'DAOBase: startTime ge endTime.');
+        require(input_.startTime < input_.endTime, 'DAOBase: startTime ge endTime.');
         require(options_.length > 0, 'DAOBase: dont have enough options.');
 
         uint256 _proposalIndex = proposalIndex;
+        proposalIndex = _proposalIndex + 1;
         Proposal storage proposal = proposals[_proposalIndex];
         for (uint256 _index = 0; _index < options_.length; _index++) {
             proposal.options.push(ProposalOption({
@@ -155,15 +161,14 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
             }));
         }
         proposal.creator = msg.sender;
-        proposal.title = title_;
-        proposal.introduction = introduction_;
-        proposal.content = content_;
-        proposal.startTime = startTime_;
-        proposal.endTime = endTime_;
-        proposal.votingType = votingType_;
-        proposalIndex = _proposalIndex + 1;
+        proposal.title = input_.title;
+        proposal.introduction = input_.introduction;
+        proposal.content = input_.content;
+        proposal.startTime = input_.startTime;
+        proposal.endTime = input_.endTime;
+        proposal.votingType = input_.votingType;
 
-        emit CreateProposal(_proposalIndex, msg.sender, _nonce, startTime_, endTime_);
+        emit CreateProposal(_proposalIndex, msg.sender, _nonce, input_.startTime, input_.endTime);
     }
 
     /**
