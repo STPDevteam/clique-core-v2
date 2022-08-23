@@ -50,6 +50,7 @@ const config: HardhatUserConfig = {
     // Obtain one at https://etherscan.com/
     apiKey: {
       rinkeby: `${process.env.apiKey}`,
+      goerli: `${process.env.apiKey}`,
       polygonMumbai: `${process.env.apiKeyPolygon}`,
       mainnet: `${process.env.apiKey}`
     }
