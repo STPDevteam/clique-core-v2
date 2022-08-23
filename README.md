@@ -21,5 +21,5 @@ npx harhat compile
 ```
 
 ## 📜 Contract Addresses
-- For [Rinkeby Testnet](./docs/deployments/rinkeby.md).
+- For [Goerli Testnet](./docs/deployments/goerli.md).
 - For [Mumbai Testnet](./docs/deployments/mumbai.md).
