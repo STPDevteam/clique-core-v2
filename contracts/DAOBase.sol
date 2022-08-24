@@ -32,6 +32,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
     // @dev proposals slot
     uint256 public proposalIndex;
     mapping(uint256 => Proposal) public proposals;
+    mapping(address => mapping(uint256 => VoteInfo[])) public voteInfos;
 
     // @dev Event
     event Setting(uint256 indexed settingType);
@@ -55,6 +56,11 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
 
     struct ProposalOption {
         string name;
+        uint256 amount;
+    }
+
+    struct VoteInfo {
+        uint256 index;
         uint256 amount;
     }
 
@@ -177,13 +183,14 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
     function vote(
         uint256 proposalId_,
         uint256[] calldata optionIndexes_,
-        uint256[] calldata amount_,
+        uint256[] calldata amounts_,
         SignInfo calldata signInfo_,
         bytes calldata signature_
     ) external {
         Proposal memory _proposal = proposals[proposalId_];
         require(proposalIndex > proposalId_, 'DAOBase: proposal id not exists.');
-        require(optionIndexes_.length == amount_.length, 'DAOBase: invalid length.');
+        require(optionIndexes_.length == amounts_.length, 'DAOBase: invalid length.');
+        require(voteInfos[msg.sender][proposalId_].length == 0, 'DAOBase: already voted.');
 
         uint256 _nonce = IDAOFactory(factoryAddress).increaseNonce(msg.sender);
         require(_verifySignature(_nonce, signInfo_, signature_), 'DAOBase: invalid signer.');
@@ -192,18 +199,18 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         if (proposals[proposalId_].votingType == VotingType.Single)
             require(optionIndexes_.length == 1, 'DAOBase: invalid length.');
 
-        uint256 totalAmount = 0;
-        uint256 optionsLength = proposals[proposalId_].options.length;
-        ProposalOption[] storage proposalOptions = proposals[proposalId_].options;
+        uint256 _totalAmount = 0;
+        uint256 _optionsLength = proposals[proposalId_].options.length;
         for (uint256 _index = 0; _index < optionIndexes_.length; _index++) {
-            require(optionsLength > optionIndexes_[_index], 'DAOBase: proposal option index not exists.');
-            totalAmount += amount_[_index];
-            proposalOptions[optionIndexes_[_index]].amount += amount_[_index];
+            require(_optionsLength > optionIndexes_[_index], 'DAOBase: proposal option index not exists.');
+            _totalAmount += amounts_[_index];
+            proposals[proposalId_].options[optionIndexes_[_index]].amount += amounts_[_index];
+            voteInfos[msg.sender][proposalId_].push(VoteInfo(optionIndexes_[_index], amounts_[_index]));
 
-            emit Vote(proposalId_, msg.sender, optionIndexes_[_index], amount_[_index], _nonce);
+            emit Vote(proposalId_, msg.sender, optionIndexes_[_index], amounts_[_index], _nonce);
         }
 
-        require(signInfo_.balance >= totalAmount, 'DAOBase: insufficient balance');
+        require(signInfo_.balance >= _totalAmount, 'DAOBase: insufficient balance');
     }
 
     /**
@@ -223,6 +230,10 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
     //------------------------ public get ------------------------//
     function getProposalOptionById(uint256 proposalId_) external view returns (ProposalOption[] memory) {
         return proposals[proposalId_].options;
+    }
+
+    function getVoteInfoByAccountAndProposalId(address account_, uint256 proposalId_) external view returns (VoteInfo[] memory) {
+        return voteInfos[account_][proposalId_];
     }
 
     //------------------------ private ------------------------//
