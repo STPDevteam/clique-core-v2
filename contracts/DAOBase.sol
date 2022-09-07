@@ -5,8 +5,13 @@ import './interfaces/IDAOBase.sol';
 import './interfaces/IDAOFactory.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 
 contract DAOBase is OwnableUpgradeable, IDAOBase {
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+
     // @dev constant
     uint256 public constant SETTING_TYPE_GENERAL = 0;
     uint256 public constant SETTING_TYPE_TOKEN = 1;
@@ -34,12 +39,18 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
     mapping(uint256 => Proposal) public proposals;
     mapping(address => mapping(uint256 => VoteInfo[])) public voteInfos;
 
+    mapping(uint256 => Airdrop) public airdrops;
+    mapping(uint256 => mapping(address => bool)) private claimedMap;
+
     // @dev Event
     event Setting(uint256 indexed settingType);
     event Admin(address indexed admin, bool enable);
     event CreateProposal(uint256 indexed proposalId, address indexed proposer, uint256 nonce, uint256 startTime, uint256 endTime);
     event CancelProposal(uint256 indexed proposalId);
     event Vote(uint256 indexed proposalId, address indexed voter, uint256 indexed optionIndex, uint256 amount, uint256 nonce);
+
+    event CreateAirdrop(address indexed creator, address indexed airdropId, address token, uint256 amount, bytes32 merkleRoot, uint256 startTime, uint256 endTime);
+    event Claimed(address indexed airdropId, uint256 index, address account, uint256 amount);
 
     // @dev Struct
     struct Proposal {
@@ -280,6 +291,68 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         address _signer = ECDSAUpgradeable.recover(_hash, signature_);
 
         return IDAOFactory(factoryAddress).isSigner(_signer);
+    }
+
+    function createAirdrop(
+        uint256 airdropId_,
+        address token_,
+        uint256 amount_,
+        bytes32 merkleRoot_,
+        uint256 startTime_,
+        uint256 endTime_
+    ) external onlyOwnerOrAdmin {
+        require(airdrops[airdropId_].token == address(0), 'DAOFactory: duplicate airdrop id.');
+        require(token_ != address(0), 'DAOFactory: not a valid token address.');
+        require(endTime_ > startTime_, 'DAOFactory: invalid time.');
+
+        IERC20Upgradeable(_airdrop.token).safeTransferFrom(msg.sender, address(this), amount_);
+        airdrops[airdropId_] = Airdrop({
+            token: token_,
+            tokenReserve: amount_,
+            merkleRoot: merkleRoot_,
+            startTime: startTime_,
+            endTime: endTime_,
+            creator: msg.sender
+        });
+
+        emit CreateAirdrop(msg.sender, airdropId_, token_, amount_, merkleRoot_, startTime_, endTime_);
+    }
+
+    function isClaimed(uint256 airdropId_, address account_) public view returns (bool) {
+        return claimedMap[airdropId_][account_];
+    }
+
+    function _setClaimed(uint256 airdropId_, address account_, uint256 amount_) private {
+        claimedMap[airdropId_][account_] = true;
+        airdrops[airdropId_].tokenReserve -= amount_;
+    }
+
+    function claimAirdrop(uint256 airdropId_, uint256 index_, address account_, uint256 amount_, bytes32[] calldata merkleProof_) external {
+        Airdrop memory _airdrop = airdrops[airdropId_];
+        require(_airdrop.token != address(0), 'DAOFactory: not a valid airdrop id.');
+        require(block.timestamp > _airdrop.startTime, 'DAOFactory: cannot claim yet.');
+        require(block.timestamp <= _airdrop.endTime, 'DAOFactory: airdrop already done.');
+        require(!isClaimed(airdropId_, account_), 'DAOFactory: drop already claimed.');
+
+        // Verify the merkle proof.
+        bytes32 node = keccak256(abi.encodePacked(index_, account_, amount_));
+        require(MerkleProofUpgradeable.verify(merkleProof_, _airdrop.merkleRoot, node), 'DAOFactory: invalid proof.');
+
+        // Mark it claimed and send the token.
+        _setClaimed(airdropId_, account_, amount_);
+        IERC20Upgradeable(_airdrop.token).safeTransfer(account_, amount_);
+
+        emit Claimed(airdropId_, index_, account_, amount_);
+    }
+
+    function recycleAirdrop(uint256 airdropId_) external {
+        Airdrop memory _airdrop = airdrops[airdropId_];
+        require(_airdrop.token != address(0), 'DAOFactory: not a valid airdrop id.');
+        require(block.timestamp > _airdrop.endTime, 'DAOFactory: cannot recycle yet.');
+        require(_airdrop.tokenReserve > 0, 'DAOFactory: claimed out.');
+
+        airdrops[airdropId_].tokenReserve = 0;
+        IERC20Upgradeable(_airdrop.token).safeTransfer(_airdrop.creator, _airdrop.tokenReserve);
     }
 
 }

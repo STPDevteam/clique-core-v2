@@ -33,4 +33,14 @@ interface IDAOBase {
         VotingType votingType;
     }
 
+    struct Airdrop {
+        address token;
+        uint256 tokenReserve;
+        bytes32 merkleRoot;
+        uint256 startTime;
+        uint256 endTime;
+
+        address creator;
+    }
+
 }
