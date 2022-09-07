@@ -49,8 +49,8 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
     event CancelProposal(uint256 indexed proposalId);
     event Vote(uint256 indexed proposalId, address indexed voter, uint256 indexed optionIndex, uint256 amount, uint256 nonce);
 
-    event CreateAirdrop(address indexed creator, address indexed airdropId, address token, uint256 amount, bytes32 merkleRoot, uint256 startTime, uint256 endTime);
-    event Claimed(address indexed airdropId, uint256 index, address account, uint256 amount);
+    event CreateAirdrop(address indexed creator, uint256 indexed airdropId, address token, uint256 amount, bytes32 merkleRoot, uint256 startTime, uint256 endTime);
+    event Claimed(uint256 indexed airdropId, uint256 index, address account, uint256 amount);
 
     // @dev Struct
     struct Proposal {
@@ -305,7 +305,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         require(token_ != address(0), 'DAOFactory: not a valid token address.');
         require(endTime_ > startTime_, 'DAOFactory: invalid time.');
 
-        IERC20Upgradeable(_airdrop.token).safeTransferFrom(msg.sender, address(this), amount_);
+        IERC20Upgradeable(token_).safeTransferFrom(msg.sender, address(this), amount_);
         airdrops[airdropId_] = Airdrop({
             token: token_,
             tokenReserve: amount_,
