@@ -1,9 +1,27 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-chai-matchers";
+import "hardhat-contract-sizer";
+import "hardhat-log-remover";
+import "hardhat-deploy";
+import "@nomiclabs/hardhat-ethers";
+import "solidity-coverage";
+import "hardhat-gas-reporter";
+import {CHAINID} from "./constants/constants";
 
 require('dotenv').config({path: '.env'})
 
+const ETHERSCAN_API_KEYS: Map<number, string> = new Map<number, string>([
+    [CHAINID.ETH_GOERLI, `${process.env.apiKey}`],
+    [CHAINID.POLYGON_MUMBAI, `${process.env.apiKeyPolygon}`]
+]);
+const chainId = process.env.CHAINID ? Number(process.env.CHAINID) : 5;
+
 const config: HardhatUserConfig = {
+  paths: {
+    deploy: "scripts/deploy",
+    deployments: "deployments",
+  },
   networks: {
     // Test net
     rinkeby: {
@@ -45,15 +63,22 @@ const config: HardhatUserConfig = {
       }
     }
   },
+  namedAccounts: {
+    deployer: {
+      default: 5,
+      5: "0x637856e617b168cF63C0A0E4FEf923be7C67FFcf",
+      80001: "0x637856e617b168cF63C0A0E4FEf923be7C67FFcf",
+    },
+    admin: {
+      default: 5,
+      5: "0xbC86F047d37D29cB97ee7D860c5355A5f12c62d5",
+      80001: "0xbC86F047d37D29cB97ee7D860c5355A5f12c62d5",
+    }
+  },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.com/
-    apiKey: {
-      rinkeby: `${process.env.apiKey}`,
-      goerli: `${process.env.apiKey}`,
-      polygonMumbai: `${process.env.apiKeyPolygon}`,
-      mainnet: `${process.env.apiKey}`
-    }
+    apiKey: ETHERSCAN_API_KEYS.get(chainId)
   },
   solidity: {
     version: "0.8.9",
