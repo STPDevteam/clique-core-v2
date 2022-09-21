@@ -18,6 +18,7 @@ interface IDAOBase {
         string github;
         string discord;
         string daoLogo;
+        string website;
     }
 
     struct Token {
