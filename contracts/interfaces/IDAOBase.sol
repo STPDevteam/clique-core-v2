@@ -18,6 +18,7 @@ interface IDAOBase {
         string github;
         string discord;
         string daoLogo;
+        string website;
     }
 
     struct Token {
@@ -31,16 +32,6 @@ interface IDAOBase {
         uint256 votingQuorum;
         uint256 votingPeriod;          // 0 if removed
         VotingType votingType;
-    }
-
-    struct Airdrop {
-        address token;
-        uint256 tokenReserve;
-        bytes32 merkleRoot;
-        uint256 startTime;
-        uint256 endTime;
-
-        address creator;
     }
 
 }
