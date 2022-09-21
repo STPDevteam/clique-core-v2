@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import '@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     using ClonesUpgradeable for address;
@@ -28,7 +29,7 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     mapping(address => Reserve[]) public reserves;
     mapping(address => address[]) public tokensByAccount;
 
-    event CreateDAO(address indexed creator, address indexed daoAddress, uint256 chainId, address tokenAddress);
+    event CreateDAO(uint256 indexed handler, address indexed creator, address indexed daoAddress, uint256 chainId, address tokenAddress);
 
     event CreateERC20(address indexed creator, address token);
     event ClaimReserve(address indexed account, address indexed token, uint256 amount);
@@ -61,7 +62,7 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
         _signers[signer_] = enable_;
     }
 
-    function isSigner(address signer_) external override view returns (bool) {
+    function isSigner(address signer_) public override view returns (bool) {
         return _signers[signer_];
     }
 
@@ -73,9 +74,25 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     function createDAO(
         IDAOBase.General calldata general_,
         IDAOBase.Token calldata token_,
-        IDAOBase.Governance calldata governance_
+        IDAOBase.Governance calldata governance_,
+        uint256 deadline_,  // block number
+        bytes calldata signature_
     ) external {
+        require(deadline_ >= block.number, 'DAOFactory: signature was expired.');
         require(!handles[general_.handle], 'DAOFactory: handle is already taken.');
+
+        bytes32 _handleHash = keccak256(abi.encodePacked(general_.handle));
+        bytes32 _hash = ECDSAUpgradeable.toEthSignedMessageHash(
+            keccak256(
+                abi.encodePacked(
+                    msg.sender,
+                    block.chainid,
+                    deadline_,
+                    _handleHash
+                )
+            )
+        );
+        require(isSigner(ECDSAUpgradeable.recover(_hash, signature_)), 'DAOFactory: invalid signer.');
 
         // address _daoAddress = daoImpl.clone();
         // IDAOBase(_daoAddress).initialize(general_, token_, governance_);
@@ -89,7 +106,7 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
         handles[general_.handle] = true;
         _daoAddresses[address(_proxy)] = true;
 
-        emit CreateDAO(msg.sender, address(_proxy), token_.chainId, token_.tokenAddress);
+        emit CreateDAO(uint256(_handleHash), msg.sender, address(_proxy), token_.chainId, token_.tokenAddress);
     }
 
     function upgradeProxy(address payable daoAddress_) external {
