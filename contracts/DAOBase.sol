@@ -122,8 +122,12 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         _setAdmin(admin_, enabled_);
     }
 
-    function setInfo(General calldata general_) external onlyOwnerOrAdmin {
-        _setInfo(general_);
+    /**
+     * @dev set dao info
+     */
+    function setInfo(string[] calldata args) external onlyOwnerOrAdmin {
+        require(args.length == 8, 'DAOBase: length mismatch.');
+        _setInfo(General(args[0], daoInfo.handle, args[1], args[2], args[3], args[4], args[5], args[6], args[7]));
     }
 
     function setGovernance(Governance calldata governance_) external onlyOwnerOrAdmin {
@@ -244,7 +248,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         emit Admin(admin_, enabled_);
     }
 
-    function _setInfo(General calldata general_) private {
+    function _setInfo(General memory general_) private {
         daoInfo = general_;
 
         emit Setting(SETTING_TYPE_GENERAL);
