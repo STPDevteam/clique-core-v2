@@ -29,7 +29,7 @@ interface IDAOBase {
     enum VotingType { Any, Single, Multi }
     struct Governance {
         uint256 proposalThreshold;
-        uint256 votingQuorum;
+        uint256 votingThreshold;
         uint256 votingPeriod;          // 0 if removed
         VotingType votingType;
     }
