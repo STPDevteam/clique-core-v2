@@ -51,6 +51,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         string content;
         uint256 startTime;
         uint256 endTime;
+        uint256 votingThresholdSnapshot;
         VotingType votingType;
         ProposalOption[] options;
     }
@@ -177,6 +178,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         proposal.content = input_.content;
         proposal.startTime = input_.startTime;
         proposal.endTime = input_.endTime;
+        proposal.votingThresholdSnapshot = _governance.votingThreshold;
         proposal.votingType = input_.votingType;
 
         emit CreateProposal(_proposalIndex, msg.sender, _nonce, input_.startTime, input_.endTime);
