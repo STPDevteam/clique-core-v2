@@ -34,6 +34,8 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
     event CreateERC20(address indexed creator, address token);
     event ClaimReserve(address indexed account, address indexed token, uint256 amount);
 
+    event SignerSet(address indexed account, bool enable);
+
     constructor() { }
 
     function initialize(address daoImpl_, address tokenImpl_) external initializer {
@@ -60,6 +62,8 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
 
     function setSigner(address signer_, bool enable_) onlyOwner external {
         _signers[signer_] = enable_;
+
+        emit SignerSet(signer_, enable_);
     }
 
     function isSigner(address signer_) public override view returns (bool) {
