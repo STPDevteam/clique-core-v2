@@ -38,6 +38,11 @@ contract DAOAirdrop {
         uint256 startTime,
         uint256 endTime
     );
+    event SettleAirdrop(
+        uint256 indexed airdropId,
+        uint256 amount,
+        bytes32 merkleTreeRoot
+    );
     event Claimed(
         uint256 indexed airdropId,
         uint256 index,
@@ -101,6 +106,8 @@ contract DAOAirdrop {
 
         airdrops[airdropId_].tokenStaked = amount_;
         airdrops[airdropId_].merkleRoot = merkleRoot_;
+
+        emit SettleAirdrop(airdropId_, amount_, merkleRoot_);
     }
 
     function isClaimed(uint256 airdropId_, address account_) public view returns (bool) {
