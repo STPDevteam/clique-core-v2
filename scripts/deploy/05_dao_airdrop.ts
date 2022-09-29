@@ -14,7 +14,7 @@ const main = async ({
     const logicDAOAirdrop = await deployments.get('DAOAirdropLogic');
 
     const proxy = await deploy('DAOAirdrop', {
-        contract: 'AdminUpgradeabilityProxy',
+        contract: 'TransparentUpgradeableProxy',
         from: deployer,
         args: [logicDAOAirdrop.address, admin, '']
     });

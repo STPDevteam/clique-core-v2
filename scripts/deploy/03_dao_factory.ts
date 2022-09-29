@@ -27,7 +27,7 @@ const main = async ({
     );
 
     const proxy = await deploy('DAOFactory', {
-       contract: 'AdminUpgradeabilityProxy',
+       contract: 'TransparentUpgradeableProxy',
        from: deployer,
        args: [logicDaoFactory.address, admin, initData]
     });
