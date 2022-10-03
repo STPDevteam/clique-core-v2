@@ -16,10 +16,10 @@ const main = async ({
     const logicDaoFactory = await deployments.get('DAOFactoryLogic');
 
     const DAOFactory = await ethers.getContractFactory('DAOFactory', {});
-    const initArgs = [{
-        daoImpl_: logicDAOBase.address,
-        tokenImpl_: logicERC20Base.address
-    }];
+    const initArgs = [
+        logicDAOBase.address,
+        logicERC20Base.address
+    ];
 
     const initData = DAOFactory.interface.encodeFunctionData(
         'initialize',
