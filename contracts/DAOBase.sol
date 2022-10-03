@@ -181,7 +181,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         proposal.votingThresholdSnapshot = _governance.votingThreshold;
         proposal.votingType = input_.votingType;
 
-        emit CreateProposal(_proposalIndex, msg.sender, _nonce, input_.startTime, input_.endTime);
+        emit CreateProposal(_proposalIndex, msg.sender, _nonce, input_.startTime, _endTime);
     }
 
     /**
