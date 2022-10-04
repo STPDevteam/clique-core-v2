@@ -92,7 +92,6 @@ contract DAOAirdrop {
 
     function settleAirdrop(uint256 airdropId_, uint256 amount_, bytes32 merkleRoot_) external payable {
         Airdrop memory _airdrop = airdrops[airdropId_];
-        require(_airdrop.token != address(0), 'DAOAirdrop: not a valid airdrop id.');
         require(_airdrop.creator == msg.sender, 'DAOAirdrop: not the creator.');
         require(_airdrop.merkleRoot == bytes32(0), 'DAOAirdrop: already settle.');
 
