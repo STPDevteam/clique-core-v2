@@ -177,7 +177,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         proposal.introduction = input_.introduction;
         proposal.content = input_.content;
         proposal.startTime = input_.startTime;
-        proposal.endTime = input_.endTime;
+        proposal.endTime = _endTime;
         proposal.votingThresholdSnapshot = _governance.votingThreshold;
         proposal.votingType = input_.votingType;
 
