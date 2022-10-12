@@ -201,7 +201,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
 
         uint256 _nonce = IDAOFactory(factoryAddress).increaseNonce(msg.sender);
         require(_verifySignature(_nonce, signInfo_, signature_), 'DAOBase: invalid signer.');
-        require(block.timestamp > _proposal.startTime && block.timestamp <= _proposal.endTime, 'DAOBase: vote on a wrong time.');
+        require(block.timestamp >= _proposal.startTime && block.timestamp < _proposal.endTime, 'DAOBase: vote on a wrong time.');
         require(!_proposal.cancel, 'DAOBase: already canceled.');
         if (proposals[proposalId_].votingType == VotingType.Single)
             require(optionIndexes_.length == 1, 'DAOBase: invalid length.');
@@ -226,8 +226,8 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
     function cancelProposal(uint256 proposalId_) external {
         Proposal memory _proposal = proposals[proposalId_];
         require(proposalIndex > proposalId_, 'DAOBase: proposal id not exists.');
-        require(block.timestamp <= _proposal.endTime, 'DAOBase: already done.');
-        require(msg.sender == _proposal.creator, 'DAOBase: sender is not creator.');
+        require(block.timestamp < _proposal.startTime, 'DAOBase: already started.');
+        require(msg.sender == _proposal.creator, 'DAOBase: sender is not the creator.');
         require(!_proposal.cancel, 'DAOBase: already canceled.');
 
         proposals[proposalId_].cancel = true;
