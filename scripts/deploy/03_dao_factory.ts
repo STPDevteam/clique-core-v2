@@ -1,5 +1,6 @@
 import { run } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import {SIGNER} from "../../constants/constants";
 
 const main = async ({
     network,
@@ -32,6 +33,10 @@ const main = async ({
        args: [logicDaoFactory.address, admin, initData]
     });
     console.log(`Dao Factory Proxy @ ${proxy.address}`)
+
+    const daoFactory = await DAOFactory.attach(proxy.address)
+    const tx = await daoFactory.setSigner(SIGNER, true)
+    await tx.wait()
 
     try {
         await run("verify:verify", {
