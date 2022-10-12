@@ -63,6 +63,17 @@ const config: HardhatUserConfig = {
         initialIndex: 0,
         count: 10
       }
+    },
+
+    // Polygon main net
+    polygon: {
+      url: `${process.env.provider_polygon}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_polygon}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 10
+      }
     }
   },
   namedAccounts: {
