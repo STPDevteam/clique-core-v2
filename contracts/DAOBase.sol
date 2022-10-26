@@ -38,9 +38,9 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
     // @dev Event
     event Setting(uint256 indexed settingType);
     event Admin(address indexed admin, bool enable);
-    event CreateProposal(uint256 indexed proposalId, address indexed proposer, uint256 nonce, uint256 startTime, uint256 endTime);
+    event CreateProposal(uint256 indexed proposalId, address indexed proposer, uint256 startTime, uint256 endTime);
     event CancelProposal(uint256 indexed proposalId);
-    event Vote(uint256 indexed proposalId, address indexed voter, uint256 indexed optionIndex, uint256 amount, uint256 nonce);
+    event Vote(uint256 indexed proposalId, address indexed voter, uint256 indexed optionIndex, uint256 amount);
 
     // @dev Struct
     struct Proposal {
@@ -72,6 +72,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         address tokenAddress;
         uint256 balance;
         SignType signType;
+        uint256 proposalIdOrDeadline;
     }
 
     struct ProposalInput {
@@ -150,11 +151,11 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         require(
             input_.votingType != VotingType.Any &&
             (_governance.votingType == VotingType.Any || _governance.votingType == input_.votingType),
-            'DAOBase: invalid voting type.'
+                'DAOBase: invalid voting type.'
         );
-        uint256 _nonce = IDAOFactory(factoryAddress).increaseNonce(msg.sender);
-        require(_verifySignature(_nonce, signInfo_, signature_), 'DAOBase: invalid signer.');
-        require(signInfo_.balance >= _governance.proposalThreshold, 'DAOBase: insufficient balance');
+        require(signInfo_.proposalIdOrDeadline >= block.timestamp, 'DAOBase: expired.');
+        require(_verifySignature(signInfo_, signature_), 'DAOBase: invalid signer.');
+        require(signInfo_.balance >= _governance.proposalThreshold, 'DAOBase: insufficient balance.');
 
         uint256 _endTime = input_.endTime;
         if (_governance.votingPeriod > 0) {
@@ -181,43 +182,42 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         proposal.votingThresholdSnapshot = _governance.votingThreshold;
         proposal.votingType = input_.votingType;
 
-        emit CreateProposal(_proposalIndex, msg.sender, _nonce, input_.startTime, _endTime);
+        emit CreateProposal(_proposalIndex, msg.sender, input_.startTime, _endTime);
     }
 
     /**
      * @dev vote for proposal
      */
     function vote(
-        uint256 proposalId_,
         uint256[] calldata optionIndexes_,
         uint256[] calldata amounts_,
         SignInfo calldata signInfo_,
         bytes calldata signature_
     ) external {
-        Proposal memory _proposal = proposals[proposalId_];
-        require(proposalIndex > proposalId_, 'DAOBase: proposal id not exists.');
+        uint256 _proposalId = signInfo_.proposalIdOrDeadline;
+        Proposal memory _proposal = proposals[_proposalId];
+        require(proposalIndex > _proposalId, 'DAOBase: proposal id not exists.');
         require(optionIndexes_.length == amounts_.length, 'DAOBase: invalid length.');
-        require(voteInfos[msg.sender][proposalId_].length == 0, 'DAOBase: already voted.');
+        require(voteInfos[msg.sender][_proposalId].length == 0, 'DAOBase: already voted.');
 
-        uint256 _nonce = IDAOFactory(factoryAddress).increaseNonce(msg.sender);
-        require(_verifySignature(_nonce, signInfo_, signature_), 'DAOBase: invalid signer.');
+        require(_verifySignature(signInfo_, signature_), 'DAOBase: invalid signer.');
         require(block.timestamp >= _proposal.startTime && block.timestamp < _proposal.endTime, 'DAOBase: vote on a wrong time.');
         require(!_proposal.cancel, 'DAOBase: already canceled.');
-        if (proposals[proposalId_].votingType == VotingType.Single)
+        if (proposals[_proposalId].votingType == VotingType.Single)
             require(optionIndexes_.length == 1, 'DAOBase: invalid length.');
 
         uint256 _totalAmount = 0;
-        uint256 _optionsLength = proposals[proposalId_].options.length;
+        uint256 _optionsLength = proposals[_proposalId].options.length;
         for (uint256 _index = 0; _index < optionIndexes_.length; _index++) {
             require(_optionsLength > optionIndexes_[_index], 'DAOBase: proposal option index not exists.');
             _totalAmount += amounts_[_index];
-            proposals[proposalId_].options[optionIndexes_[_index]].amount += amounts_[_index];
-            voteInfos[msg.sender][proposalId_].push(VoteInfo(optionIndexes_[_index], amounts_[_index]));
+            proposals[_proposalId].options[optionIndexes_[_index]].amount += amounts_[_index];
+            voteInfos[msg.sender][_proposalId].push(VoteInfo(optionIndexes_[_index], amounts_[_index]));
 
-            emit Vote(proposalId_, msg.sender, optionIndexes_[_index], amounts_[_index], _nonce);
+            emit Vote(_proposalId, msg.sender, optionIndexes_[_index], amounts_[_index]);
         }
 
-        require(signInfo_.balance >= _totalAmount, 'DAOBase: insufficient balance');
+        require(signInfo_.balance >= _totalAmount, 'DAOBase: insufficient balance.');
     }
 
     /**
@@ -268,7 +268,7 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         emit Setting(SETTING_TYPE_GOVERNANCE);
     }
 
-    function _verifySignature(uint256 nonce_, SignInfo calldata signInfo_, bytes calldata signature_) private view returns (bool) {
+    function _verifySignature(SignInfo calldata signInfo_, bytes calldata signature_) private view returns (bool) {
         if (signInfo_.chainId != daoToken.chainId || signInfo_.tokenAddress != daoToken.tokenAddress) {
             return false;
         }
@@ -276,9 +276,11 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
             keccak256(
                 abi.encodePacked(
                     msg.sender,
-                    nonce_,
+                    block.chainid,
+                    address(this),
                     signInfo_.chainId,
                     signInfo_.tokenAddress,
+                    signInfo_.proposalIdOrDeadline,
                     signInfo_.balance,
                     uint256(signInfo_.signType)
                 )
@@ -287,5 +289,9 @@ contract DAOBase is OwnableUpgradeable, IDAOBase {
         address _signer = ECDSAUpgradeable.recover(_hash, signature_);
 
         return IDAOFactory(factoryAddress).isSigner(_signer);
+    }
+
+    function daoVersion() external pure returns (string memory) {
+        return 'v0.2.1';
     }
 }
