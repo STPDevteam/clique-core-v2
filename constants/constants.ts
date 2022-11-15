@@ -3,6 +3,7 @@ export enum CHAINID {
     ETH_GOERLI = 5,
     POLYGON = 137,
     POLYGON_MUMBAI = 80001,
+    BSC_TESTNET = 97, 
 }
 
 export const SIGNER = "0xdDCb698c459BC99eD0476e058c1aaB02680aA5c5"
