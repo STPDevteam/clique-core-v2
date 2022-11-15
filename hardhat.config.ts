@@ -53,6 +53,15 @@ const config: HardhatUserConfig = {
         count: 10
       }
     },
+    baobab: {
+      url: `${process.env.provider_baobab}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_baobab}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 10
+      }
+    },
 
     // Main net
     mainnet: {
@@ -78,14 +87,14 @@ const config: HardhatUserConfig = {
   },
   namedAccounts: {
     deployer: {
-      default: 5,
+      default: 0,
       1: "0x60d1Ce3e4aC99f1f27f276A26BEeb4454d4f1161",
       5: "0x637856e617b168cF63C0A0E4FEf923be7C67FFcf",
       137: "0x60d1Ce3e4aC99f1f27f276A26BEeb4454d4f1161",
       80001: "0x637856e617b168cF63C0A0E4FEf923be7C67FFcf",
     },
     admin: {
-      default: 5,
+      default: 1,
       1: "0x5931f4A88807d29B1732cAe52D5cEa6C3DE2119D",
       5: "0xbC86F047d37D29cB97ee7D860c5355A5f12c62d5",
       137: "0x5931f4A88807d29B1732cAe52D5cEa6C3DE2119D",
