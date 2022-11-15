@@ -70,7 +70,7 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: `${process.env.mnemonic_mainnet}`,
         path: "m/44'/60'/0'/0",
-        initialIndex: 0,
+        initialIndex: 0 ,
         count: 10
       }
     },
