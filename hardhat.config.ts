@@ -16,6 +16,7 @@ const ETHERSCAN_API_KEYS: Map<number, string> = new Map<number, string>([
     [CHAINID.ETH_GOERLI, `${process.env.apiKey}`],
     [CHAINID.POLYGON, `${process.env.apiKeyPolygon}`],
     [CHAINID.POLYGON_MUMBAI, `${process.env.apiKeyPolygon}`],
+    [CHAINID.BSC_MAINNET, `${process.env.apiKeybsc}`],
     [CHAINID.BSC_TESTNET, `${process.env.apiKeybsc}`]
 ]);
 const chainId = process.env.CHAINID ? Number(process.env.CHAINID) : 5;
@@ -79,7 +80,7 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: `${process.env.mnemonic_mainnet}`,
         path: "m/44'/60'/0'/0",
-        initialIndex: 0,
+        initialIndex: 0 ,
         count: 10
       }
     },
@@ -93,8 +94,32 @@ const config: HardhatUserConfig = {
         initialIndex: 0,
         count: 10
       }
+    },
+
+    // BSC main net
+    bsc: {
+      url: `${process.env.provider_bsc}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_bsc}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 10
+      }
+    },
+
+    // klaytn main net
+    klaytn: {
+      url: `${process.env.provider_klaytn}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_klaytn}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 10
+      }
     }
   },
+
+  
   namedAccounts: {
     deployer: {
       default: 0,
