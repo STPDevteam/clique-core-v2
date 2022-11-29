@@ -3,9 +3,19 @@ import { deployments, ethers } from "hardhat";
 import { SIGNER } from "../constants/constants";
 
 async function main() {
+    // Client.forTestnet
+    // Client.Previewnet
+    // Client.forMainnet
     const client = Client.forTestnet();
     // Account and Private Key      (ED25519)
-    client.setOperator('', '')
+
+    require('dotenv').config({path: '../.env'})
+
+    // client.setOperator('','')
+    client.setOperator(
+        `${process.env.accountid_hedera}`,
+        `${process.env.private_key_hedera}`
+        )
 
     //  1.   deploy DAOBase Logic contract
     const contractBytecodeDAOBase = (await deployments.getArtifact('DAOBase')).bytecode
@@ -54,7 +64,8 @@ async function main() {
         .setConstructorParameters(
             new ContractFunctionParameters()
                 .addAddress(contractAddressFactory)
-                .addAddress(AccountId.fromString('0.0.48942409').toSolidityAddress())
+                // admin_accountID
+                .addAddress(AccountId.fromString(`${process.env.admin_accountid}`).toSolidityAddress())
                 .addBytes(new Uint8Array())
                 // .addBytes(Array(initData.utf8))
 
@@ -141,7 +152,8 @@ async function main() {
         .setConstructorParameters(
             new ContractFunctionParameters()
                 .addAddress(contractAddressAirdrop)
-                .addAddress(AccountId.fromString('0.0.48942409').toSolidityAddress())
+                // admin_accountID
+                .addAddress(AccountId.fromString(`${process.env.admin_accountid}`).toSolidityAddress())
                 .addBytes(new Uint8Array())
         )
         .setGas(1200000);
