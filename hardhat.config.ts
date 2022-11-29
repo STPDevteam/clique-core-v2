@@ -74,6 +74,12 @@ const config: HardhatUserConfig = {
       }
     },
 
+    // hederatestnet: {
+    //   url: `${process.env.provider_hederatestnet}`,
+    //   accounts: 
+    //     ["",""]
+    // },
+
     // Main net
     mainnet: {
       url: `${process.env.provider_mainnet}`,
