@@ -17,7 +17,8 @@ const ETHERSCAN_API_KEYS: Map<number, string> = new Map<number, string>([
     [CHAINID.POLYGON, `${process.env.apiKeyPolygon}`],
     [CHAINID.POLYGON_MUMBAI, `${process.env.apiKeyPolygon}`],
     [CHAINID.BSC_MAINNET, `${process.env.apiKeybsc}`],
-    [CHAINID.BSC_TESTNET, `${process.env.apiKeybsc}`]
+    [CHAINID.BSC_TESTNET, `${process.env.apiKeybsc}`],
+    [CHAINID.POLYGON_MANGO, `${process.env.apiKeyPolygon}`]
 ]);
 const chainId = process.env.CHAINID ? Number(process.env.CHAINID) : 5;
 
@@ -68,6 +69,16 @@ const config: HardhatUserConfig = {
       url: `${process.env.provider_bsctestnet}`,
       accounts: {
         mnemonic: `${process.env.mnemonic_bsctestnet}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 10
+      }
+    },
+    // Polygon zkEVM Testnet Mango
+    mango: {
+      url: `${process.env.provider_mango}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_mango}`,
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
