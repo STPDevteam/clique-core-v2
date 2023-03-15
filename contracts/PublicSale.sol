@@ -46,7 +46,7 @@ contract PublicSale is Ownable2Step {
         uint256 _startTime,
         uint256 _endTime,
         bytes calldata _signature
-    ) external payable {
+    ) external {
         require(_startTime < _endTime && _endTime > block.timestamp, "PublicSale: invalid duration.");
         require(_saleAmount > 0, "PublicSale: invalid sale amount.");
         require(_pricePer > 0, "PublicSale: invalid price.");
@@ -90,7 +90,7 @@ contract PublicSale is Ownable2Step {
         uint256 _saleId,
         uint256 _buyAmount,
         bytes calldata _signature
-    ) external payable {
+    ) external {
         require(!sales[_saleId].isCancel, "PublicSale: invalid sale.");
         require(sales[_saleId].startTime < block.timestamp && sales[_saleId].endTime > block.timestamp, "PublicSale: invalid sale.");
         require(_buyAmount > 0 && _buyAmount >= sales[_saleId].limitMin && _buyAmount <= sales[_saleId].limitMax, "PublicSale: invalid amount.");
@@ -115,7 +115,7 @@ contract PublicSale is Ownable2Step {
         emit Purchased(_saleId, _buyAmount);
     }
 
-    function Cancel(uint256 _saleId) external payable {
+    function Cancel(uint256 _saleId) external {
         uint256 amount = sales[_saleId].saleAmount - sales[_saleId].soldedAmount;
         require(sales[_saleId].creator == _msgSender(), "PublicSale: invalid account.");
         require(amount > 0, "PublicSale: invalid balance.");
