@@ -71,8 +71,8 @@ contract PublicSale is Ownable2Step {
 
         sales[_saleId].soldedAmount += _buyAmount;
 
-        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].receiveToken), _msgSender(), sales[_saleId].creator, _buyAmount);
-        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].saleToken), address(this), _msgSender(), sales[_saleId].pricePer * _buyAmount);
+        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].receiveToken), _msgSender(), sales[_saleId].creator, sales[_saleId].pricePer * _buyAmount);
+        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].saleToken), address(this), _msgSender(), _buyAmount);
 
         emit Purchased(_saleId, _buyAmount);
     }
