@@ -11,6 +11,7 @@ contract PublicSale is Ownable2StepUpgradeable {
 
     address public immutable factoryAddress;
     mapping(uint256 => sale) public sales;
+    mapping(uint256 => mapping(address => buyerInfo)) public buyer;
 
     constructor(address factoryAddress_) {
         factoryAddress = factoryAddress_;
@@ -31,6 +32,11 @@ contract PublicSale is Ownable2StepUpgradeable {
         bool isCancel;
     }
 
+    struct buyerInfo {
+        bool isBought;
+        uint256 boughtAmount;
+    }
+
     event CreatedSale(uint256 indexed saleId, address indexed saleToken, address indexed receiveToken, uint256 saleAmount, uint256 pricePer, uint256 limitMin, uint256 limitMax, uint256 startTime, uint256 endTime);
     event Purchased(uint256 indexed saleId, uint256 indexed buyAmount);
     event CancelSale(uint256 indexed saleId);
@@ -47,10 +53,11 @@ contract PublicSale is Ownable2StepUpgradeable {
         uint256 _endTime,
         bytes calldata _signature
     ) external {
+        require(sales[_saleId].creator == address(0), "PublicSale: invalid saleId.");
         require(_startTime < _endTime && _endTime > block.timestamp, "PublicSale: invalid duration.");
         require(_saleAmount > 0, "PublicSale: invalid sale amount.");
         require(_pricePer > 0, "PublicSale: invalid price.");
-        require(_limitMin > 0 && _limitMax > 0 && _limitMax >= _limitMin, "PublicSale: invalid purchase.");
+        require(_limitMin >= 0 && _limitMax > 0 && _limitMax >= _limitMin, "PublicSale: invalid purchase.");
         require(_saleToken != address(0) && _receiveToken != address(0), "PublicSale: invalid token.");
 
         bytes32 _hash = ECDSAUpgradeable.toEthSignedMessageHash(
@@ -91,10 +98,13 @@ contract PublicSale is Ownable2StepUpgradeable {
         uint256 _buyAmount,
         bytes calldata _signature
     ) external {
+        require(!buyer[_saleId][_msgSender()].isBought, "PublicSale: bought.");
         require(!sales[_saleId].isCancel, "PublicSale: invalid sale.");
         require(sales[_saleId].startTime < block.timestamp && sales[_saleId].endTime > block.timestamp, "PublicSale: invalid sale.");
         require(_buyAmount > 0 && _buyAmount >= sales[_saleId].limitMin && _buyAmount <= sales[_saleId].limitMax, "PublicSale: invalid amount.");
         require(sales[_saleId].soldedAmount + _buyAmount <= sales[_saleId].saleAmount, "PublicSale: invalid amount.");
+        require(_buyAmount <= sales[_saleId].limitMax - buyer[_saleId][_msgSender()].boughtAmount, "PublicSale: invalid amount.");
+
 
         bytes32 _hash = ECDSAUpgradeable.toEthSignedMessageHash(
             keccak256(
@@ -108,6 +118,10 @@ contract PublicSale is Ownable2StepUpgradeable {
         require(IDAOFactory(factoryAddress).isSigner(ECDSAUpgradeable.recover(_hash, _signature)), 'PublicSale: invalid signer.');
 
         sales[_saleId].soldedAmount += _buyAmount;
+        buyer[_saleId][_msgSender()].boughtAmount += _buyAmount;
+        if (_buyAmount + buyer[_saleId][_msgSender()].boughtAmount == sales[_saleId].limitMax) {
+            buyer[_saleId][_msgSender()].isBought = true;
+        }
 
         SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sales[_saleId].receiveToken), _msgSender(), sales[_saleId].creator, sales[_saleId].pricePer * _buyAmount);
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sales[_saleId].saleToken), _msgSender(), _buyAmount);
