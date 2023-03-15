@@ -2,12 +2,12 @@
 pragma solidity =0.8.9;
 
 import './interfaces/IDAOFactory.sol';
-import "@openzeppelin/contracts/access/Ownable2Step.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
-contract PublicSale is Ownable2Step {
+contract PublicSale is Ownable2StepUpgradeable {
 
     address public immutable factoryAddress;
     mapping(uint256 => sale) public sales;
@@ -81,7 +81,7 @@ contract PublicSale is Ownable2Step {
         sales[_saleId].startTime = _startTime;
         sales[_saleId].endTime = _endTime;
 
-        SafeERC20.safeTransferFrom(IERC20(_saleToken), _msgSender(), address(this), _saleAmount);
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(_saleToken), _msgSender(), address(this), _saleAmount);
 
         emit CreatedSale(_saleId, _saleToken, _receiveToken, _saleAmount, _pricePer, _limitMin, _limitMax, _startTime, _endTime);
     }
@@ -109,8 +109,8 @@ contract PublicSale is Ownable2Step {
 
         sales[_saleId].soldedAmount += _buyAmount;
 
-        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].receiveToken), _msgSender(), sales[_saleId].creator, sales[_saleId].pricePer * _buyAmount);
-        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].saleToken), address(this), _msgSender(), _buyAmount);
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sales[_saleId].receiveToken), _msgSender(), sales[_saleId].creator, sales[_saleId].pricePer * _buyAmount);
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sales[_saleId].saleToken), _msgSender(), _buyAmount);
 
         emit Purchased(_saleId, _buyAmount);
     }
@@ -122,7 +122,7 @@ contract PublicSale is Ownable2Step {
 
         sales[_saleId].isCancel = true;
 
-        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].saleToken), address(this), _msgSender(), amount);
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sales[_saleId].saleToken), _msgSender(), amount);
 
         emit CancelSale(_saleId);
     }
