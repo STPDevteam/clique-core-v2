@@ -116,11 +116,13 @@ contract PublicSale is Ownable2Step {
     }
 
     function Cancel(uint256 _saleId) external payable {
+        uint256 amount = sales[_saleId].saleAmount - sales[_saleId].soldedAmount;
         require(sales[_saleId].creator == _msgSender(), "PublicSale: invalid account.");
+        require(amount > 0, "PublicSale: invalid balance.");
 
         sales[_saleId].isCancel = true;
 
-        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].saleToken), address(this), _msgSender(), sales[_saleId].saleAmount - sales[_saleId].soldedAmount);
+        SafeERC20.safeTransferFrom(IERC20(sales[_saleId].saleToken), address(this), _msgSender(), amount);
 
         emit CancelSale(_saleId);
     }
