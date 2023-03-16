@@ -10,14 +10,13 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 contract PublicSale is Ownable2StepUpgradeable {
 
     address public immutable factoryAddress;
-    mapping(uint256 => sale) public sales;
-    mapping(uint256 => mapping(address => buyerInfo)) public buyer;
+    mapping(uint256 => Sale) public sales;
 
     constructor(address factoryAddress_) {
         factoryAddress = factoryAddress_;
     }
 
-    struct sale {
+    struct Sale {
         address creator;
         address saleToken;
         uint256 saleAmount;
@@ -28,13 +27,10 @@ contract PublicSale is Ownable2StepUpgradeable {
         uint256 startTime;
         uint256 endTime;
 
-        uint256 soldedAmount;
+        uint256 soldAmount;
         bool isCancel;
-    }
 
-    struct buyerInfo {
-        bool isBought;
-        uint256 boughtAmount;
+        mapping(address => uint256) boughtAmounts;
     }
 
     event CreatedSale(uint256 indexed saleId, address indexed saleToken, address indexed receiveToken, uint256 saleAmount, uint256 pricePer, uint256 limitMin, uint256 limitMax, uint256 startTime, uint256 endTime);
@@ -53,7 +49,8 @@ contract PublicSale is Ownable2StepUpgradeable {
         uint256 _endTime,
         bytes calldata _signature
     ) external {
-        require(sales[_saleId].creator == address(0), "PublicSale: invalid saleId.");
+        Sale storage sale = sales[_saleId];
+        require(sale.creator == address(0), "PublicSale: invalid saleId.");
         require(_startTime < _endTime && _endTime > block.timestamp, "PublicSale: invalid duration.");
         require(_saleAmount > 0, "PublicSale: invalid sale amount.");
         require(_pricePer > 0, "PublicSale: invalid price.");
@@ -78,15 +75,15 @@ contract PublicSale is Ownable2StepUpgradeable {
         );
         require(IDAOFactory(factoryAddress).isSigner(ECDSAUpgradeable.recover(_hash, _signature)), 'PublicSale: invalid signer.');
 
-        sales[_saleId].creator = _msgSender();
-        sales[_saleId].saleToken = _saleToken;
-        sales[_saleId].saleAmount = _saleAmount;
-        sales[_saleId].receiveToken = _receiveToken;
-        sales[_saleId].pricePer = _pricePer;
-        sales[_saleId].limitMin = _limitMin;
-        sales[_saleId].limitMax = _limitMax;
-        sales[_saleId].startTime = _startTime;
-        sales[_saleId].endTime = _endTime;
+        sale.creator = _msgSender();
+        sale.saleToken = _saleToken;
+        sale.saleAmount = _saleAmount;
+        sale.receiveToken = _receiveToken;
+        sale.pricePer = _pricePer;
+        sale.limitMin = _limitMin;
+        sale.limitMax = _limitMax;
+        sale.startTime = _startTime;
+        sale.endTime = _endTime;
 
         SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(_saleToken), _msgSender(), address(this), _saleAmount);
 
@@ -98,13 +95,15 @@ contract PublicSale is Ownable2StepUpgradeable {
         uint256 _buyAmount,
         bytes calldata _signature
     ) external {
-        require(!buyer[_saleId][_msgSender()].isBought, "PublicSale: bought.");
-        require(!sales[_saleId].isCancel, "PublicSale: invalid sale.");
-        require(sales[_saleId].startTime < block.timestamp && sales[_saleId].endTime > block.timestamp, "PublicSale: invalid sale.");
-        require(_buyAmount > 0 && _buyAmount >= sales[_saleId].limitMin && _buyAmount <= sales[_saleId].limitMax, "PublicSale: invalid amount.");
-        require(sales[_saleId].soldedAmount + _buyAmount <= sales[_saleId].saleAmount, "PublicSale: invalid amount.");
-        require(_buyAmount <= sales[_saleId].limitMax - buyer[_saleId][_msgSender()].boughtAmount, "PublicSale: invalid amount.");
+        Sale storage sale = sales[_saleId];
+        require(sale.creator != address(0) && !sale.isCancel, "PublicSale: invalid sale.");
+        require(sale.startTime <= block.timestamp && sale.endTime > block.timestamp, "PublicSale: invalid sale.");
+        require(_buyAmount > 0 && _buyAmount >= sale.limitMin, "PublicSale: invalid amount.");
 
+        uint256 soldAmount = sale.soldAmount + _buyAmount;
+        uint256 boughtAmount = sale.boughtAmounts[_msgSender()] + _buyAmount;
+        require(soldAmount <= sale.saleAmount, "PublicSale: invalid amount.");
+        require(boughtAmount <= sale.limitMax, "PublicSale: invalid amount.");
 
         bytes32 _hash = ECDSAUpgradeable.toEthSignedMessageHash(
             keccak256(
@@ -117,27 +116,25 @@ contract PublicSale is Ownable2StepUpgradeable {
         );
         require(IDAOFactory(factoryAddress).isSigner(ECDSAUpgradeable.recover(_hash, _signature)), 'PublicSale: invalid signer.');
 
-        sales[_saleId].soldedAmount += _buyAmount;
-        buyer[_saleId][_msgSender()].boughtAmount += _buyAmount;
-        if (_buyAmount + buyer[_saleId][_msgSender()].boughtAmount == sales[_saleId].limitMax) {
-            buyer[_saleId][_msgSender()].isBought = true;
-        }
+        sale.soldAmount = soldAmount;
+        sale.boughtAmounts[_msgSender()] = boughtAmount;
 
-        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sales[_saleId].receiveToken), _msgSender(), sales[_saleId].creator, sales[_saleId].pricePer * _buyAmount);
-        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sales[_saleId].saleToken), _msgSender(), _buyAmount);
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sale.receiveToken), _msgSender(), sale.creator, sale.pricePer * _buyAmount);
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sale.saleToken), _msgSender(), _buyAmount);
 
         emit Purchased(_saleId, _buyAmount);
     }
 
     function Cancel(uint256 _saleId) external {
-        uint256 amount = sales[_saleId].saleAmount - sales[_saleId].soldedAmount;
-        require(sales[_saleId].creator == _msgSender(), "PublicSale: invalid account.");
+        Sale storage sale = sales[_saleId];
+        uint256 amount = sale.saleAmount - sale.soldAmount;
+        require(sale.creator == _msgSender(), "PublicSale: invalid account.");
         require(amount > 0, "PublicSale: invalid balance.");
-        require(!sales[_saleId].isCancel, "PublicSale: cancelled.");
+        require(!sale.isCancel, "PublicSale: cancelled.");
 
-        sales[_saleId].isCancel = true;
+        sale.isCancel = true;
 
-        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sales[_saleId].saleToken), _msgSender(), amount);
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sale.saleToken), _msgSender(), amount);
 
         emit CancelSale(_saleId);
     }
