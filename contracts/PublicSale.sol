@@ -133,6 +133,7 @@ contract PublicSale is Ownable2StepUpgradeable {
         uint256 amount = sales[_saleId].saleAmount - sales[_saleId].soldedAmount;
         require(sales[_saleId].creator == _msgSender(), "PublicSale: invalid account.");
         require(amount > 0, "PublicSale: invalid balance.");
+        require(!sales[_saleId].isCancel, "PublicSale: cancelled.");
 
         sales[_saleId].isCancel = true;
 
