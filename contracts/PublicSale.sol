@@ -4,6 +4,7 @@ pragma solidity =0.8.9;
 import './interfaces/IDAOFactory.sol';
 import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
@@ -34,7 +35,7 @@ contract PublicSale is Ownable2StepUpgradeable {
     }
 
     event CreatedSale(uint256 indexed saleId, address indexed saleToken, address indexed receiveToken, uint256 saleAmount, uint256 pricePer, uint256 limitMin, uint256 limitMax, uint256 startTime, uint256 endTime);
-    event Purchased(uint256 indexed saleId, uint256 indexed buyAmount);
+    event Purchased(uint256 indexed saleId, uint256 indexed buyAmount, uint256 indexed payAmount);
     event CancelSale(uint256 indexed saleId);
 
     function CreateSale(
@@ -119,10 +120,11 @@ contract PublicSale is Ownable2StepUpgradeable {
         sale.soldAmount = soldAmount;
         sale.boughtAmounts[_msgSender()] = boughtAmount;
 
-        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sale.receiveToken), _msgSender(), sale.creator, sale.pricePer * _buyAmount);
+        uint256 receiveAmount = sale.pricePer * _buyAmount/(10 ** IERC20MetadataUpgradeable(sale.receiveToken).decimals());
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sale.receiveToken), _msgSender(), sale.creator, receiveAmount);
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sale.saleToken), _msgSender(), _buyAmount);
 
-        emit Purchased(_saleId, _buyAmount);
+        emit Purchased(_saleId, _buyAmount, receiveAmount);
     }
 
     function Cancel(uint256 _saleId) external {
