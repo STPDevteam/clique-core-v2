@@ -34,7 +34,7 @@ contract PublicSale is Ownable2StepUpgradeable {
     }
 
     event CreatedSale(uint256 indexed saleId, address indexed saleToken, address indexed receiveToken, uint256 saleAmount, uint256 pricePer, uint256 limitMin, uint256 limitMax, uint256 startTime, uint256 endTime);
-    event Purchased(uint256 indexed saleId, uint256 indexed buyAmount);
+    event Purchased(uint256 indexed saleId, uint256 indexed buyAmount, uint256 indexed payAmount);
     event CancelSale(uint256 indexed saleId);
 
     function CreateSale(
@@ -122,7 +122,7 @@ contract PublicSale is Ownable2StepUpgradeable {
         SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sale.receiveToken), _msgSender(), sale.creator, sale.pricePer * _buyAmount);
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sale.saleToken), _msgSender(), _buyAmount);
 
-        emit Purchased(_saleId, _buyAmount);
+        emit Purchased(_saleId, _buyAmount, sale.pricePer * _buyAmount);
     }
 
     function Cancel(uint256 _saleId) external {
