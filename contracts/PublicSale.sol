@@ -2,13 +2,15 @@
 pragma solidity =0.8.9;
 
 import './interfaces/IDAOFactory.sol';
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-contract PublicSale is Ownable2StepUpgradeable {
+contract PublicSale is Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
 
     address public immutable factoryAddress;
     mapping(uint256 => Sale) public sales;
@@ -56,7 +58,7 @@ contract PublicSale is Ownable2StepUpgradeable {
         require(_saleAmount > 0, "PublicSale: invalid sale amount.");
         require(_pricePer > 0, "PublicSale: invalid price.");
         require(_limitMin >= 0 && _limitMax > 0 && _limitMax >= _limitMin, "PublicSale: invalid purchase.");
-        require(_saleToken != address(0) && _receiveToken != address(0), "PublicSale: invalid token.");
+        require(_saleToken != address(0), "PublicSale: invalid token.");
 
         bytes32 _hash = ECDSAUpgradeable.toEthSignedMessageHash(
             keccak256(
@@ -95,7 +97,7 @@ contract PublicSale is Ownable2StepUpgradeable {
         uint256 _saleId,
         uint256 _buyAmount,
         bytes calldata _signature
-    ) external {
+    ) external nonReentrant payable {
         Sale storage sale = sales[_saleId];
         require(sale.creator != address(0) && !sale.isCancel, "PublicSale: invalid sale.");
         require(sale.startTime <= block.timestamp && sale.endTime > block.timestamp, "PublicSale: invalid sale.");
@@ -121,7 +123,12 @@ contract PublicSale is Ownable2StepUpgradeable {
         sale.boughtAmounts[_msgSender()] = boughtAmount;
 
         uint256 receiveAmount = sale.pricePer * _buyAmount/(10 ** IERC20MetadataUpgradeable(sale.receiveToken).decimals());
-        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sale.receiveToken), _msgSender(), sale.creator, receiveAmount);
+        if (sale.receiveToken == address(0)) {
+            require(receiveAmount == msg.value, "CustomGameTask: insufficient value.");
+            AddressUpgradeable.sendValue(payable(sale.creator), receiveAmount);
+        } else {
+            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(sale.receiveToken), _msgSender(), sale.creator, receiveAmount);
+        }
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sale.saleToken), _msgSender(), _buyAmount);
 
         emit Purchased(_saleId, _buyAmount, receiveAmount);
