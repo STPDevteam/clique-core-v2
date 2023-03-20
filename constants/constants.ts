@@ -1,6 +1,7 @@
 export enum CHAINID {
     ETH_MAINNET = 1,
     ETH_GOERLI = 5,
+    ETH_SEPOLIA = 11155111,
     POLYGON = 137,
     BSC_MAINNET = 56,
     POLYGON_MUMBAI = 80001,

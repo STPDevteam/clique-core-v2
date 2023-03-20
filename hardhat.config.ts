@@ -14,6 +14,7 @@ require('dotenv').config({path: '.env'})
 const ETHERSCAN_API_KEYS: Map<number, string> = new Map<number, string>([
     [CHAINID.ETH_MAINNET, `${process.env.apiKey}`],
     [CHAINID.ETH_GOERLI, `${process.env.apiKey}`],
+    [CHAINID.ETH_SEPOLIA, `${process.env.apiKey}`],
     [CHAINID.POLYGON, `${process.env.apiKeyPolygon}`],
     [CHAINID.POLYGON_MUMBAI, `${process.env.apiKeyPolygon}`],
     [CHAINID.BSC_MAINNET, `${process.env.apiKeybsc}`],
@@ -29,12 +30,12 @@ const config: HardhatUserConfig = {
   },
   networks: {
     // Test net
-    rinkeby: {
-      url: `${process.env.provider_rinkeby}`,
+    sepolia: {
+      url: `${process.env.provider_sepolia}`,
       accounts: {
-        mnemonic: `${process.env.mnemonic_rinkeby}`,
+        mnemonic: `${process.env.mnemonic_sepolia}`,
         path: "m/44'/60'/0'/0",
-        initialIndex: 1,
+        initialIndex: 0,
         count: 10
       }
     },
@@ -43,7 +44,7 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: `${process.env.mnemonic_goerli}`,
         path: "m/44'/60'/0'/0",
-        initialIndex: 1,
+        initialIndex: 0,
         count: 10
       }
     },
@@ -52,7 +53,7 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: `${process.env.mnemonic_mumbai}`,
         path: "m/44'/60'/0'/0",
-        initialIndex: 1,
+        initialIndex: 0,
         count: 10
       }
     },
@@ -140,19 +141,19 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 0,
-      1: "0x60d1Ce3e4aC99f1f27f276A26BEeb4454d4f1161",
-      5: "0x637856e617b168cF63C0A0E4FEf923be7C67FFcf",
-      137: "0x60d1Ce3e4aC99f1f27f276A26BEeb4454d4f1161",
-      80001: "0x637856e617b168cF63C0A0E4FEf923be7C67FFcf",
-      97: "0x77601d3637e32b2afD6b5d8d97e758e131C85Df1",
+      // 1: "0x60d1Ce3e4aC99f1f27f276A26BEeb4454d4f1161",
+      // 5: "0x637856e617b168cF63C0A0E4FEf923be7C67FFcf",
+      // 137: "0x60d1Ce3e4aC99f1f27f276A26BEeb4454d4f1161",
+      // 80001: "0x637856e617b168cF63C0A0E4FEf923be7C67FFcf",
+      // 97: "0x77601d3637e32b2afD6b5d8d97e758e131C85Df1",
     },
     admin: {
       default: 1,
-      1: "0x5931f4A88807d29B1732cAe52D5cEa6C3DE2119D",
-      5: "0xbC86F047d37D29cB97ee7D860c5355A5f12c62d5",
-      137: "0x5931f4A88807d29B1732cAe52D5cEa6C3DE2119D",
-      80001: "0xbC86F047d37D29cB97ee7D860c5355A5f12c62d5",
-      97: "0xbb61406891A6a330bb49a54856c378F53f2e66B0",
+      // 1: "0x5931f4A88807d29B1732cAe52D5cEa6C3DE2119D",
+      // 5: "0xbC86F047d37D29cB97ee7D860c5355A5f12c62d5",
+      // 137: "0x5931f4A88807d29B1732cAe52D5cEa6C3DE2119D",
+      // 80001: "0xbC86F047d37D29cB97ee7D860c5355A5f12c62d5",
+      // 97: "0xbb61406891A6a330bb49a54856c378F53f2e66B0",
     }
   },
   etherscan: {
