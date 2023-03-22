@@ -150,4 +150,8 @@ contract PublicSale is Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
 
         emit CancelSale(_saleId);
     }
+
+    function querySoldAmount(uint256 _saleId, address _account) public view returns (uint256) {
+        return sales[_saleId].boughtAmounts[_account];
+    }
 }
