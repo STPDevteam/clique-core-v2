@@ -122,14 +122,12 @@ contract PublicSale is Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
         sale.soldAmount = soldAmount;
         sale.boughtAmounts[_msgSender()] = boughtAmount;
 
-        uint256 receiveAmount;
         address receiveToken = sale.receiveToken;
+        uint256 receiveAmount = sale.pricePer * _buyAmount / (10 ** IERC20MetadataUpgradeable(sale.saleToken).decimals());
         if (receiveToken == address(0)) {
-            receiveAmount = sale.pricePer * _buyAmount / 1 ether;
             require(receiveAmount == msg.value, "PublicSale: insufficient value.");
             AddressUpgradeable.sendValue(payable(sale.creator), receiveAmount);
         } else {
-            receiveAmount = sale.pricePer * _buyAmount / (10 ** IERC20MetadataUpgradeable(receiveToken).decimals());
             SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(receiveToken), _msgSender(), sale.creator, receiveAmount);
         }
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sale.saleToken), _msgSender(), _buyAmount);
