@@ -92,7 +92,12 @@ contract PublicSale is Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
 
         emit CreatedSale(_saleId, _saleToken, _receiveToken, _saleAmount, _pricePer, _limitMin, _limitMax, _startTime, _endTime);
     }
-
+//0xd9afcc2d
+//0000000000000000000000000000000000000000000000000000000000000045
+//0000000000000000000000000000000000000000000000001bc16d674ec80000
+//2000000000000000000
+//900000
+//000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000413eda43f0b9be159bd7d2ad4834e4a5bc598c3e15b50fd587c6d33174905472d21e8380d384ece6dc1689dc5162c7b851db632cc7046cb89bc20b6542cee29f371b00000000000000000000000000000000000000000000000000000000000000
     function Purchase(
         uint256 _saleId,
         uint256 _buyAmount,
@@ -122,14 +127,12 @@ contract PublicSale is Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
         sale.soldAmount = soldAmount;
         sale.boughtAmounts[_msgSender()] = boughtAmount;
 
-        uint256 receiveAmount;
         address receiveToken = sale.receiveToken;
+        uint256 receiveAmount = sale.pricePer * _buyAmount / (10 ** IERC20MetadataUpgradeable(sale.saleToken).decimals());
         if (receiveToken == address(0)) {
-            receiveAmount = sale.pricePer * _buyAmount / 1 ether;
             require(receiveAmount == msg.value, "PublicSale: insufficient value.");
             AddressUpgradeable.sendValue(payable(sale.creator), receiveAmount);
         } else {
-            receiveAmount = sale.pricePer * _buyAmount / (10 ** IERC20MetadataUpgradeable(receiveToken).decimals());
             SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(receiveToken), _msgSender(), sale.creator, receiveAmount);
         }
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(sale.saleToken), _msgSender(), _buyAmount);
