@@ -85,6 +85,16 @@ const config: HardhatUserConfig = {
         count: 10
       }
     },
+    // Zetachain Testnet
+    zetatestnet: {
+      url: `${process.env.provider_zetatestnet}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_zetatestnet}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 10
+      }
+    },
 
     // hederatestnet: {
     //   url: `${process.env.provider_hederatestnet}`,
