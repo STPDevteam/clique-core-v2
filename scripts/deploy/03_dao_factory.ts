@@ -10,7 +10,7 @@ const main = async ({
 }: HardhatRuntimeEnvironment) => {
     const { deploy } = deployments;
     const { deployer, admin } = await getNamedAccounts();
-    console.log(`02 - Deploying DAOFactory on ${network.name}`);
+    console.log(`03 - Deploying DAOFactory on ${network.name}`);
 
     const logicDAOBase = await deployments.get('DAOBaseLogic');
     const logicERC20Base = await deployments.get('ERC20BaseLogic');
