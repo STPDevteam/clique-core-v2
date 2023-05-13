@@ -7,6 +7,8 @@ export enum CHAINID {
     POLYGON_MUMBAI = 80001,
     BSC_TESTNET = 97,
     POLYGON_MANGO = 1422,
+    ZKSYNC_TEST = 280,
+    ZKSYNC = 324,
 }
 
 export const SIGNER = "0xdDCb698c459BC99eD0476e058c1aaB02680aA5c5"

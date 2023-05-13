@@ -131,7 +131,10 @@ contract DAOFactory is OwnableUpgradeable, IDAOFactory {
         uint256 totalSupply_,
         DistributionParam[] calldata distributions_
     ) external {
-        address _token = tokenImpl.clone();
+        // address _token = tokenImpl.clone();
+
+        // using proxy, but unupgrade
+        address _token = address(new TransparentUpgradeableProxy(tokenImpl, proxyAdminAddress, ''));
         IERC20Base(_token).initialize(name_, symbol_, decimal_, totalSupply_);
         logoURLs[_token] = logoUrl_;
         tokensByAccount[msg.sender].push(_token);

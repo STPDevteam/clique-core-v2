@@ -8,5 +8,7 @@ typechain-types
 #Hardhat files
 cache
 artifacts
+cache-zk
+artifacts-zk
 
 .idea
