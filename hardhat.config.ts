@@ -8,6 +8,9 @@ import "@nomiclabs/hardhat-ethers";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
 import {CHAINID} from "./constants/constants";
+import "@matterlabs/hardhat-zksync-solc";
+import "@matterlabs/hardhat-zksync-deploy";
+import '@matterlabs/hardhat-zksync-upgradable';
 
 require('dotenv').config({path: '.env'})
 
@@ -28,6 +31,16 @@ const config: HardhatUserConfig = {
     deploy: "scripts/deploy",
     deployments: "deployments",
   },
+  zksolc: {
+    version: "1.3.7",
+    compilerSource: "binary",
+    settings: {
+      optimizer: {
+        enabled: true, // optional. True by default
+      }
+    }
+  },
+  defaultNetwork: 'zksynctestnet',
   networks: {
     // Test net
     sepolia: {
@@ -37,7 +50,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     },
     goerli: {
       url: `${process.env.provider_goerli}`,
@@ -46,7 +60,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     },
     mumbai: {
       url: `${process.env.provider_mumbai}`,
@@ -55,7 +70,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     },
     baobab: {
       url: `${process.env.provider_baobab}`,
@@ -64,7 +80,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     },
     bsctestnet: {
       url: `${process.env.provider_bsctestnet}`,
@@ -73,7 +90,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     },
     // Polygon zkEVM Testnet Mango
     mango: {
@@ -83,7 +101,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     },
     // Zetachain Testnet
     zetatestnet: {
@@ -93,7 +112,21 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
+    },
+    // zk sync testnet
+    zksynctestnet: {
+      url: `${process.env.provider_zksynctestnet}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_zksynctestnet}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 10
+      },
+      ethNetwork: "goerli",
+      zksync: true,
+      chainId: 280
     },
 
     // hederatestnet: {
@@ -110,7 +143,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0 ,
         count: 10
-      }
+      },
+      zksync: false
     },
 
     // Polygon main net
@@ -121,7 +155,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     },
 
     // BSC main net
@@ -132,7 +167,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     },
 
     // klaytn main net
@@ -143,7 +179,8 @@ const config: HardhatUserConfig = {
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 10
-      }
+      },
+      zksync: false
     }
   },
 
