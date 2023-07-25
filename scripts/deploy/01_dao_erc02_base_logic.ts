@@ -13,6 +13,7 @@ const main = async ({
     const erc20Base = await deploy("ERC20BaseLogic", {
         contract: "ERC20Base",
         from: deployer,
+        log: true,
     });
     console.log(`ERC20Base @ ${erc20Base.address}`);
 

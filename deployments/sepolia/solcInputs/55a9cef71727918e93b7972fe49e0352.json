@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Voting.sol": {
+      "content": "//SPDX-License-Identifier: Unlicense\npragma solidity =0.8.9;\n\ncontract Voting {\n    \n    event Voted(uint256 indexed proposalId, uint256[] optionId, uint256[] amount);\n\n    function voting(uint256 proposalId, uint256[] calldata optionIds, uint256[] calldata amounts) external {\n        // Notice: The backend need to verify everything\n        emit Voted(proposalId, optionIds, amounts);\n    }\n\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 800
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

@@ -13,6 +13,7 @@ const main = async ({
     const daoFactory = await deploy("DAOFactoryLogic", {
         contract: "DAOFactory",
         from: deployer,
+        log: true,
     });
     console.log(`DAOFactory @ ${daoFactory.address}`);
 

@@ -2,30 +2,30 @@ import { run } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 const main = async ({
-    network,
-    deployments,
-    getNamedAccounts,
-}: HardhatRuntimeEnvironment) => {
+        network,
+        deployments,
+        getNamedAccounts,
+    }: HardhatRuntimeEnvironment) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
-    console.log(`00 - Deploying DAOBase Logic on ${network.name}`);
+    console.log(`07 - Deploying Voting on ${network.name}`);
 
-    const daoBase = await deploy("DAOBaseLogic", {
-        contract: "DAOBase",
+    const voting = await deploy('voting', {
+        contract: 'Voting',
         from: deployer,
-        log: true,
+        args: []
     });
-    console.log(`DAOBase @ ${daoBase.address}`);
+    console.log(`Voting @ ${voting.address}`)
 
     try {
         await run("verify:verify", {
-            address: daoBase.address,
+            address: voting.address,
             constructorArguments: [],
         });
     } catch (error) {
         console.log(error);
     }
 };
-main.tags = ["DAOBaseLogic"];
+main.tags = ["Voting"];
 
 export default main;
