@@ -30,7 +30,8 @@ const main = async ({
     const proxy = await deploy('DAOFactory', {
        contract: 'TransparentUpgradeableProxy',
        from: deployer,
-       args: [logicDaoFactory.address, admin, initData]
+       args: [logicDaoFactory.address, admin, initData],
+       log: true,
     });
     console.log(`Dao Factory Proxy @ ${proxy.address}`)
 

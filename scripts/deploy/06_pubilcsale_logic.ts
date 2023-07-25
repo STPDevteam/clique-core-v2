@@ -16,7 +16,8 @@ const main = async ({
     const publicSale = await deploy('PublicSaleLogic', {
         contract: 'PublicSale',
         from: deployer,
-        args: [daoFactory.address]
+        args: [daoFactory.address],
+        log: true,
     });
     console.log(`PublicSale Logic Logic @ ${publicSale.address}`)
 

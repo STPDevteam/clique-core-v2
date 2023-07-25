@@ -16,7 +16,8 @@ const main = async ({
     const daoAirdrop = await deploy('DAOAirdropLogic', {
         contract: 'DAOAirdrop',
         from: deployer,
-        args: [daoFactory.address]
+        args: [daoFactory.address],
+        log: true,
     });
     console.log(`DAO Airdrop Logic @ ${daoAirdrop.address}`)
 

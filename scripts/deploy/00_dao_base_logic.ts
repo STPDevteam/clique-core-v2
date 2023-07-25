@@ -13,6 +13,7 @@ const main = async ({
     const daoBase = await deploy("DAOBaseLogic", {
         contract: "DAOBase",
         from: deployer,
+        log: true,
     });
     console.log(`DAOBase @ ${daoBase.address}`);
 
