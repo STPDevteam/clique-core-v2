@@ -33,7 +33,7 @@ contract SBT is ERC721Enumerable {
 
     function mint(address _account) external returns (uint256) {
         require(msg.sender == sbtFactory);
-        
+
         uint256 tokenId = currentTokenId++;
         ERC721._safeMint(_account, tokenId);
 
@@ -41,9 +41,22 @@ contract SBT is ERC721Enumerable {
 
         return tokenId;
     }
+
+    /**
+     * @dev See {ERC721-_beforeTokenTransfer}.
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal virtual override {
+        require(from == address(0), 'forbidden');
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
+    }
 }
 
-contract SBTFactory is OwnableUpgradeable {
+contract SBTFactory {
 
     address public immutable daoFactory;
 
@@ -56,10 +69,6 @@ contract SBTFactory is OwnableUpgradeable {
     constructor(address _daoFactory) {
         daoFactory = _daoFactory;
     }
-    
-    function initialize() external initializer {
-        OwnableUpgradeable.__Ownable_init();
-    }
 
     function createSBT(
         uint256 _id,
@@ -71,7 +80,7 @@ contract SBTFactory is OwnableUpgradeable {
     ) external {
         // check if deployed
         require(deployedAddress[_id] == address(0), 'alreday deployed.');
-        
+
         // check signature
         bytes32 h = ECDSAUpgradeable.toEthSignedMessageHash(
             keccak256(
