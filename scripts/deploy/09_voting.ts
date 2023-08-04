@@ -8,12 +8,12 @@ const main = async ({
     }: HardhatRuntimeEnvironment) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
-    console.log(`07 - Deploying Voting on ${network.name}`);
+    console.log(`09 - Deploying Voting on ${network.name}`);
 
     const voting = await deploy('voting', {
         contract: 'Voting',
         from: deployer,
-        args: []
+        log: true,
     });
     console.log(`Voting @ ${voting.address}`)
 
