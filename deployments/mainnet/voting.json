@@ -1,0 +1,88 @@
+{
+  "address": "0x0793A0Aa494954647AD3Ee9bAe01a76BA9097D4C",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "proposalId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "optionId",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "amount",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "Voted",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "proposalId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "optionIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "amounts",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "voting",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x8dee7c2e7816d178a1d3fda413e52b70577bd09dea81ddf7bc7f8375915f9302",
+  "receipt": {
+    "to": null,
+    "from": "0x60d1Ce3e4aC99f1f27f276A26BEeb4454d4f1161",
+    "contractAddress": "0x0793A0Aa494954647AD3Ee9bAe01a76BA9097D4C",
+    "transactionIndex": 95,
+    "gasUsed": "165337",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x57216e2baddb07a5d803b0a5f874b62c4f5d5480bcff6ae37a46b0c0f99b3a51",
+    "transactionHash": "0x8dee7c2e7816d178a1d3fda413e52b70577bd09dea81ddf7bc7f8375915f9302",
+    "logs": [],
+    "blockNumber": 17840164,
+    "cumulativeGasUsed": "13405666",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "c219a343fb4a5726103add74f140a729",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.9+commit.e5eed63a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"proposalId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"optionId\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"amount\",\"type\":\"uint256[]\"}],\"name\":\"Voted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"proposalId\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"optionIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amounts\",\"type\":\"uint256[]\"}],\"name\":\"voting\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/Voting.sol\":\"Voting\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":800},\"remappings\":[]},\"sources\":{\"contracts/Voting.sol\":{\"content\":\"//SPDX-License-Identifier: Unlicense\\npragma solidity =0.8.9;\\n\\ncontract Voting {\\n    \\n    event Voted(uint256 indexed proposalId, uint256[] optionId, uint256[] amount);\\n\\n    function voting(uint256 proposalId, uint256[] calldata optionIds, uint256[] calldata amounts) external {\\n        // Notice: The backend need to verify everything\\n        emit Voted(proposalId, optionIds, amounts);\\n    }\\n\\n}\",\"keccak256\":\"0xd384be18adfdb4945a489ded0cd3972ae73bbfc7b1c28d93865532175f51ac54\",\"license\":\"Unlicense\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610207806100206000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c80630adb68bd14610030575b600080fd5b61004361003e3660046100d6565b610045565b005b847f214d819b17f6553b7b3118fb66c8b57d1d0e27b9189a527a2f44a88c52798ce18585858560405161007b949392919061019f565b60405180910390a25050505050565b60008083601f84011261009c57600080fd5b50813567ffffffffffffffff8111156100b457600080fd5b6020830191508360208260051b85010111156100cf57600080fd5b9250929050565b6000806000806000606086880312156100ee57600080fd5b85359450602086013567ffffffffffffffff8082111561010d57600080fd5b61011989838a0161008a565b9096509450604088013591508082111561013257600080fd5b5061013f8882890161008a565b969995985093965092949392505050565b81835260007f07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff83111561018257600080fd5b8260051b8083602087013760009401602001938452509192915050565b6040815260006101b3604083018688610150565b82810360208401526101c6818587610150565b97965050505050505056fea26469706673582212205461d8c30a5d20f74bfa3aaad87ccc4f749e7aba43c9d269e23d4028343f680864736f6c63430008090033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c80630adb68bd14610030575b600080fd5b61004361003e3660046100d6565b610045565b005b847f214d819b17f6553b7b3118fb66c8b57d1d0e27b9189a527a2f44a88c52798ce18585858560405161007b949392919061019f565b60405180910390a25050505050565b60008083601f84011261009c57600080fd5b50813567ffffffffffffffff8111156100b457600080fd5b6020830191508360208260051b85010111156100cf57600080fd5b9250929050565b6000806000806000606086880312156100ee57600080fd5b85359450602086013567ffffffffffffffff8082111561010d57600080fd5b61011989838a0161008a565b9096509450604088013591508082111561013257600080fd5b5061013f8882890161008a565b969995985093965092949392505050565b81835260007f07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff83111561018257600080fd5b8260051b8083602087013760009401602001938452509192915050565b6040815260006101b3604083018688610150565b82810360208401526101c6818587610150565b97965050505050505056fea26469706673582212205461d8c30a5d20f74bfa3aaad87ccc4f749e7aba43c9d269e23d4028343f680864736f6c63430008090033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}
