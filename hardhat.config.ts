@@ -129,6 +129,20 @@ const config: HardhatUserConfig = {
       chainId: 280
     },
 
+    // zk sync
+    zksync: {
+      url: `${process.env.provider_zksync}`,
+      accounts: {
+        mnemonic: `${process.env.mnemonic_zksync}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 10
+      },
+      ethNetwork: "mainnet",
+      zksync: true,
+      chainId: 324
+    },
+
     // hederatestnet: {
     //   url: `${process.env.provider_hederatestnet}`,
     //   accounts: 
