@@ -15,6 +15,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     }
 
     const wallet = new hre.ethers.Wallet('0xd79c6854d86e44c44ae398cfe7b015e6bd4e72fccb3cf24f0d08a91e6c1dd2fc')
+    console.log(wallet.address)
     // Deployer.fromEthWallet(hre)
     // const zkWallet = Wallet.fromMnemonic(process.env[`mnemonic_${hre.network.name}`]!, "m/44'/60'/0'/0/0")
     const deployer = Deployer.fromEthWallet(hre, wallet)
@@ -23,9 +24,9 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     let erc20Address = '0xC5ED0A90a13a9B8c701e7Bf3e8C4ffa9751B20A6'
     let daoFactoryAddress = '0xeb0C7B105998c88678f8A86Efc0bbD0Aa807A891'
 
-    const sbtAritifact = await deployer.loadArtifact('SBTFactory')
-    const sbt = await deployer.deploy(sbtAritifact,[daoFactoryAddress])
-    console.log(`sbt deployed at ${sbt.address}`)
+    const sbtAritifact = await deployer.loadArtifact('Voting')
+    const sbt = await deployer.deploy(sbtAritifact, [])
+    console.log(`voting deployed at ${sbt.address}`)
 
 /*
     // deploy dao base imp
